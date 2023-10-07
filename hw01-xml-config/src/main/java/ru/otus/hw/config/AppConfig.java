@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class AppConfig implements TestFileNameProvider {
 
-    private String testFileName;
+    private final String testFileName;
 
     @Override
     public String getTestFileName() {
