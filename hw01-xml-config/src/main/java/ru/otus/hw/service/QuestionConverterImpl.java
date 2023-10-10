@@ -4,19 +4,26 @@ import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class QuestionConverterImpl implements QuestionConverter {
+
     @Override
     public String convert(List<Question> questions) {
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < questions.size(); i++) {
-            result.append(i + 1).append(". ").append(questions.get(i).text()).append("%n");
-            List<Answer> answers = questions.get(i).answers();
-            for (int j = 0; j < answers.size(); j++) {
-                result.append(i + 1).append(".").append(j + 1).append(". ").append(answers.get(j).text()).append("%n");
-            }
-            result.append("%n");
-        }
-        return result.toString();
+        return IntStream.range(0, questions.size()).boxed()
+                .map(i -> formatQuestion(i + 1, questions.get(i)))
+                .collect(Collectors.joining("%n%n"));
+    }
+
+    private String formatQuestion(int questionNumber, Question question) {
+        return String.format("%d. %s%n%s", questionNumber, question.text(),
+                formatAnswers(questionNumber, question.answers()));
+    }
+
+    private String formatAnswers(int questionNumber, List<Answer> answers) {
+        return IntStream.range(0, answers.size()).boxed()
+                .map(i -> String.format("%d.%d. %s", questionNumber, i + 1, answers.get(i).text()))
+                .collect(Collectors.joining("%n"));
     }
 }
