@@ -33,9 +33,6 @@ public class CsvQuestionDaoTest {
     public void testFindAllEndsOk() throws MalformedURLException {
         when(fileNameProvider.getTestFileName()).thenReturn(TEST_FILE_NAME);
 
-        ClassLoader classLoader = mock(ClassLoader.class);
-        when(classLoader.getResource(TEST_FILE_NAME)).thenReturn(new File(TEST_FILE_NAME).toURI().toURL());
-
         List<Question> questions = csvQuestionDao.findAll();
 
         assertNotNull(questions);
@@ -60,10 +57,6 @@ public class CsvQuestionDaoTest {
     @Test
     @DisplayName("Check of questions extraction ends with QuestionReadException")
     public void testFindAllThrowsQuestionReadException() throws MalformedURLException {
-        when(fileNameProvider.getTestFileName()).thenReturn(TEST_FILE_NOT_EXIST_NAME);
-
-        ClassLoader classLoader = mock(ClassLoader.class);
-        when(classLoader.getResource(TEST_FILE_NAME)).thenReturn(new File(TEST_FILE_NAME).toURI().toURL());
 
         assertThrows(QuestionReadException.class, () -> csvQuestionDao.findAll());
     }
