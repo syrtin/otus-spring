@@ -11,12 +11,13 @@ import java.util.List;
 
 @Data
 public class QuestionDto {
+    private static final String SPLITTER = "\\|";
 
     @CsvBindByPosition(position = 0)
     private String text;
 
     @CsvBindAndSplitByPosition(position = 1, collectionType = ArrayList.class, elementType = Answer.class,
-            converter = AnswerCsvConverter.class, splitOn = "\\|")
+            converter = AnswerCsvConverter.class, splitOn = SPLITTER)
     private List<Answer> answers;
 
     public Question toDomainObject() {
