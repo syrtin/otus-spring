@@ -7,8 +7,6 @@ import ru.otus.hw.config.TestFileNameProvider;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.exceptions.QuestionReadException;
 
-import java.io.File;
-import java.net.MalformedURLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 public class CsvQuestionDaoTest {
     private static final String TEST_FILE_NAME = "test.csv";
-    private static final String TEST_FILE_NOT_EXIST_NAME = "test-file-not-exist.csv";
 
     private TestFileNameProvider fileNameProvider;
     private CsvQuestionDao csvQuestionDao;
@@ -30,7 +27,7 @@ public class CsvQuestionDaoTest {
 
     @Test
     @DisplayName("Check of questions extraction runs well")
-    public void testFindAllEndsOk() throws MalformedURLException {
+    public void testFindAllEndsOk() {
         when(fileNameProvider.getTestFileName()).thenReturn(TEST_FILE_NAME);
 
         List<Question> questions = csvQuestionDao.findAll();
@@ -56,7 +53,7 @@ public class CsvQuestionDaoTest {
 
     @Test
     @DisplayName("Check of questions extraction ends with QuestionReadException")
-    public void testFindAllThrowsQuestionReadException() throws MalformedURLException {
+    public void testFindAllThrowsQuestionReadException() {
 
         assertThrows(QuestionReadException.class, () -> csvQuestionDao.findAll());
     }
