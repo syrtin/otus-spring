@@ -1,3 +1,8 @@
 test:
   rightAnswersCountToPass: 3
   fileName: questions.csv
+
+spring:
+  messages:
+    basename: "i18n/messages"
+    encoding: UTF-8
