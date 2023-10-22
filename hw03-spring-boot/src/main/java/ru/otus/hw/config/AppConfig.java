@@ -3,6 +3,8 @@ package ru.otus.hw.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
+
 @Component
 public class AppConfig implements TestConfig, TestFileNameProvider {
 
@@ -10,10 +12,14 @@ public class AppConfig implements TestConfig, TestFileNameProvider {
 
     private final String testFileName;
 
+    private final Locale locale;
+
     public AppConfig(@Value("${test.rightAnswersCountToPass}") int rightAnswersCountToPass,
-                     @Value("${test.fileName}") String testFileName) {
+                     @Value("${test.fileName}") String testFileName,
+                     @Value("${test.locale}") Locale locale) {
         this.rightAnswersCountToPass = rightAnswersCountToPass;
         this.testFileName = testFileName;
+        this.locale = locale;
     }
 
     @Override
@@ -24,5 +30,11 @@ public class AppConfig implements TestConfig, TestFileNameProvider {
     @Override
     public String getTestFileName() {
         return testFileName;
+    }
+
+
+    @Override
+    public Locale getLocale() {
+        return locale;
     }
 }

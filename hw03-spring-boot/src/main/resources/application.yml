@@ -1,6 +1,7 @@
 test:
   rightAnswersCountToPass: 3
   fileName: questions.csv
+  locale: en
 
 spring:
   messages:

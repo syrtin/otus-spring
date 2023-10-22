@@ -1,6 +1,7 @@
 package ru.otus.hw.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import ru.otus.hw.config.TestConfig;
 import ru.otus.hw.domain.TestResult;
@@ -13,18 +14,24 @@ public class ResultServiceImpl implements ResultService {
 
     private final IOService ioService;
 
+    private final MessageSource messageSource;
+
     @Override
     public void showResult(TestResult testResult) {
         ioService.printLine("");
-        ioService.printLine("Test results: ");
-        ioService.printFormattedLine("Student: %s", testResult.getStudent().getFullName());
-        ioService.printFormattedLine("Answered questions count: %d", testResult.getAnsweredQuestions().size());
-        ioService.printFormattedLine("Right answers count: %d", testResult.getRightAnswersCount());
+        ioService.printLine(messageSource.getMessage("result.header", null, testConfig.getLocale()));
+        ioService.printFormattedLine(messageSource.getMessage("result.student",
+                new String[]{testResult.getStudent().getFullName()}, testConfig.getLocale()));
+        ioService.printFormattedLine(messageSource.getMessage("result.answeredQuestions",
+                new Integer[]{testResult.getAnsweredQuestions().size()}, testConfig.getLocale()));
+        ioService.printFormattedLine(messageSource.getMessage("result.rightAnswers",
+                new Integer[]{testResult.getRightAnswersCount()}, testConfig.getLocale()));
 
         if (testResult.getRightAnswersCount() >= testConfig.getRightAnswersCountToPass()) {
-            ioService.printLine("Congratulations! You passed test!");
+            ioService.printLine(messageSource.getMessage("result.congratulations",
+                    null, testConfig.getLocale()));
             return;
         }
-        ioService.printLine("Sorry. You fail test.");
+        ioService.printLine(messageSource.getMessage("result.fail", null, testConfig.getLocale()));
     }
 }

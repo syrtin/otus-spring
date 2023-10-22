@@ -2,8 +2,8 @@ package ru.otus.hw.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
+import ru.otus.hw.config.TestConfig;
 import ru.otus.hw.domain.Student;
 
 @Service
@@ -14,12 +14,14 @@ public class StudentServiceImpl implements StudentService {
 
     private final MessageSource messageSource;
 
+    private final TestConfig testConfig;
+
     @Override
     public Student determineCurrentStudent() {
         var firstName = ioService.readStringWithPrompt(messageSource.getMessage("input.firstname", null,
-                LocaleContextHolder.getLocale()));
+                testConfig.getLocale()));
         var lastName = ioService.readStringWithPrompt(messageSource.getMessage("input.lastname", null,
-                LocaleContextHolder.getLocale()));
+                testConfig.getLocale()));
         return new Student(firstName, lastName);
     }
 }
