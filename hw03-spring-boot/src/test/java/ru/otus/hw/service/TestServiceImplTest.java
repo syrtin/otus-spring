@@ -1,9 +1,8 @@
 package ru.otus.hw.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,14 +20,14 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 public class TestServiceImplTest {
 
-    @MockBean
+    @Autowired
     private TestConfig testConfig;
 
     @MockBean
     private CommandLineRunner commandLineRunner;
 
     @MockBean
-    private IOService ioService;
+    private LocalizedIOService localizedIOService;
 
     @MockBean
     private QuestionDao questionDao;
@@ -36,13 +35,8 @@ public class TestServiceImplTest {
     @MockBean
     private QuestionConverter questionConverter;
 
-    @InjectMocks
+    @Autowired
     private TestServiceImpl testService;
-
-    @BeforeEach
-    public void setup() {
-        testService = new TestServiceImpl(ioService, questionDao, questionConverter);
-    }
 
     @Test
     @DisplayName("Check interaction of TestServiceImpl with other services")
@@ -55,17 +49,18 @@ public class TestServiceImplTest {
 
         when(questionDao.findAll()).thenReturn(mockQuestions);
         when(questionConverter.convert(mockQuestion)).thenReturn("Converted question");
-        when(ioService.readIntForRange(1, 2,
-                "Your answer is out of range!")).thenReturn(1);
+        when(localizedIOService.readIntForRangeLocalized(1, 2,
+                "print.outOfRange")).thenReturn(1);
 
         testService.executeTestFor(student);
 
-        verify(ioService, times(1)).printLine("");
-        verify(ioService, times(1)).printFormattedLine("Please answer the questions below%n");
+        verify(localizedIOService, times(1)).printLine("");
+        verify(localizedIOService, times(1)).printLineLocalized("print.prompt");
         verify(questionDao, times(1)).findAll();
         verify(questionConverter, times(1)).convert(mockQuestion);
-        verify(ioService, times(1)).printFormattedLine("Converted question");
-        verify(ioService, times(1)).readIntForRange(1, 2, "Your answer is out of range!");
+        verify(localizedIOService, times(1)).printFormattedLine("Converted question");
+        verify(localizedIOService, times(1)).readIntForRangeLocalized(1, 2,
+                "print.outOfRange");
     }
 
     private Question getMockQuestion() {

@@ -1,13 +1,12 @@
 package ru.otus.hw.dao;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import ru.otus.hw.config.TestConfig;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import ru.otus.hw.config.TestFileNameProvider;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.exceptions.QuestionReadException;
@@ -19,30 +18,20 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class CsvQuestionDaoTest {
-    private static final String TEST_FILE_NAME = "test.csv";
-
-    @MockBean
-    private TestConfig testConfig;
+    private static final String TEST_FILE_NAME_WRONG = "test_en_wrong.csv";
 
     @MockBean
     private CommandLineRunner commandLineRunner;
 
-    @MockBean
+    @SpyBean
     private TestFileNameProvider fileNameProvider;
 
-    @InjectMocks
+    @Autowired
     private CsvQuestionDao csvQuestionDao;
-
-    @BeforeEach
-    public void setup() {
-        csvQuestionDao = new CsvQuestionDao(fileNameProvider);
-    }
 
     @Test
     @DisplayName("Check of questions extraction runs well")
     public void testFindAllEndsOk() {
-        when(fileNameProvider.getTestFileName()).thenReturn(TEST_FILE_NAME);
-
         List<Question> questions = csvQuestionDao.findAll();
 
         assertNotNull(questions);
@@ -67,6 +56,7 @@ public class CsvQuestionDaoTest {
     @Test
     @DisplayName("Check of questions extraction ends with QuestionReadException")
     public void testFindAllThrowsQuestionReadException() {
+        when(fileNameProvider.getTestFileName()).thenReturn(TEST_FILE_NAME_WRONG);
         assertThrows(QuestionReadException.class, () -> csvQuestionDao.findAll());
     }
 }

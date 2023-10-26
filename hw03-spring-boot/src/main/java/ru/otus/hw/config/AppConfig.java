@@ -1,26 +1,21 @@
 package ru.otus.hw.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
 @Component
-public class AppConfig implements TestConfig, TestFileNameProvider {
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = "test")
+public class AppConfig implements TestConfig, TestFileNameProvider, LocaleConfig {
 
-    private final int rightAnswersCountToPass;
+    private int rightAnswersCountToPass;
 
-    private final String testFileName;
+    private String testFileName;
 
-    private final Locale locale;
-
-    public AppConfig(@Value("${test.rightAnswersCountToPass}") int rightAnswersCountToPass,
-                     @Value("${test.fileName}") String testFileName,
-                     @Value("${test.locale}") Locale locale) {
-        this.rightAnswersCountToPass = rightAnswersCountToPass;
-        this.testFileName = testFileName;
-        this.locale = locale;
-    }
+    private Locale locale;
 
     @Override
     public int getRightAnswersCountToPass() {
@@ -32,9 +27,20 @@ public class AppConfig implements TestConfig, TestFileNameProvider {
         return testFileName;
     }
 
-
     @Override
     public Locale getLocale() {
         return locale;
+    }
+
+    public void setRightAnswersCountToPass(int rightAnswersCountToPass) {
+        this.rightAnswersCountToPass = rightAnswersCountToPass;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
+    public void setTestFileName(String testFileName) {
+        this.testFileName = testFileName;
     }
 }

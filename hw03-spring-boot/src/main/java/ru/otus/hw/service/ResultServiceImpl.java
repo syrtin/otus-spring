@@ -1,7 +1,6 @@
 package ru.otus.hw.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import ru.otus.hw.config.TestConfig;
 import ru.otus.hw.domain.TestResult;
@@ -12,26 +11,23 @@ public class ResultServiceImpl implements ResultService {
 
     private final TestConfig testConfig;
 
-    private final IOService ioService;
-
-    private final MessageSource messageSource;
+    private final LocalizedIOService localizedIOService;
 
     @Override
     public void showResult(TestResult testResult) {
-        ioService.printLine("");
-        ioService.printLine(messageSource.getMessage("result.header", null, testConfig.getLocale()));
-        ioService.printFormattedLine(messageSource.getMessage("result.student",
-                new String[]{testResult.getStudent().getFullName()}, testConfig.getLocale()));
-        ioService.printFormattedLine(messageSource.getMessage("result.answeredQuestions",
-                new Integer[]{testResult.getAnsweredQuestions().size()}, testConfig.getLocale()));
-        ioService.printFormattedLine(messageSource.getMessage("result.rightAnswers",
-                new Integer[]{testResult.getRightAnswersCount()}, testConfig.getLocale()));
+        localizedIOService.printLine("");
+        localizedIOService.printLineLocalized("result.header");
+        localizedIOService.printFormattedLineLocalized("result.student",
+                testResult.getStudent().getFullName());
+        localizedIOService.printFormattedLineLocalized("result.answeredQuestions",
+                testResult.getAnsweredQuestions().size());
+        localizedIOService.printFormattedLineLocalized("result.rightAnswers",
+                testResult.getRightAnswersCount());
 
         if (testResult.getRightAnswersCount() >= testConfig.getRightAnswersCountToPass()) {
-            ioService.printLine(messageSource.getMessage("result.congratulations",
-                    null, testConfig.getLocale()));
+            localizedIOService.printFormattedLineLocalized("result.congratulations");
             return;
         }
-        ioService.printLine(messageSource.getMessage("result.fail", null, testConfig.getLocale()));
+        localizedIOService.printLineLocalized("result.fail");
     }
 }
