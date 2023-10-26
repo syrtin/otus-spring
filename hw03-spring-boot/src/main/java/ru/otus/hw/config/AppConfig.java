@@ -1,13 +1,9 @@
 package ru.otus.hw.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
-@Component
-@EnableConfigurationProperties
 @ConfigurationProperties(prefix = "test")
 public class AppConfig implements TestConfig, TestFileNameProvider, LocaleConfig {
 
