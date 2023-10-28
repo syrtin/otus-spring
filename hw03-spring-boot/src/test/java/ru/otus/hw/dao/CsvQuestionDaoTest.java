@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import ru.otus.hw.config.TestFileNameProvider;
+import ru.otus.hw.config.AppConfig;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.exceptions.QuestionReadException;
 
@@ -18,13 +17,14 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class CsvQuestionDaoTest {
-    private static final String TEST_FILE_NAME_WRONG = "test_en_wrong.csv";
+    private static final String TEST_FILE_RIGHT_NAME = "test_en.csv";
+    private static final String TEST_FILE_WRONG_NAME = "test_en_wrong.csv";
 
     @MockBean
     private CommandLineRunner commandLineRunner;
 
-    @SpyBean
-    private TestFileNameProvider fileNameProvider;
+    @MockBean
+    private AppConfig appConfig;
 
     @Autowired
     private CsvQuestionDao csvQuestionDao;
@@ -32,6 +32,7 @@ public class CsvQuestionDaoTest {
     @Test
     @DisplayName("Check of questions extraction runs well")
     public void testFindAllEndsOk() {
+        when(appConfig.getTestFileName()).thenReturn(TEST_FILE_RIGHT_NAME);
         List<Question> questions = csvQuestionDao.findAll();
 
         assertNotNull(questions);
@@ -56,7 +57,7 @@ public class CsvQuestionDaoTest {
     @Test
     @DisplayName("Check of questions extraction ends with QuestionReadException")
     public void testFindAllThrowsQuestionReadException() {
-        when(fileNameProvider.getTestFileName()).thenReturn(TEST_FILE_NAME_WRONG);
+        when(appConfig.getTestFileName()).thenReturn(TEST_FILE_WRONG_NAME);
         assertThrows(QuestionReadException.class, () -> csvQuestionDao.findAll());
     }
 }
