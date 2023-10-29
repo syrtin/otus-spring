@@ -1,0 +1,6 @@
+# Добавить сюда своих вопросов. Эту строку надо пропустить при настройке CsvToBean (withSkipLines)
+Есть ли жизнь на Марсе?;Наука еще не знает точного ответа%true|Конечно. Красная НЛО из Марса. Зеленая - с Венеры%false|Абсолютно нет%false
+Как правильно загружать ресурсы из jar-файла в Java?;ClassLoader#geResourceAsStream или ClassPathResource#getInputStream%true|ClassLoader#geResource#getFile + FileReader%false|Wingardium Leviosa%false
+Как правильно обрабатывать исключение?;@SneakyThrow%false|e.printStackTrace()%false|Выбросить повторно, обернув его в бизнес-исключение (например, QuestionReadException)%true|Игнорировать исключение%false
+Какой тип массива используется для хранения символов в классе String в Java 17?;char[]%false|byte[]%true|int[]%false
+Кто был первоначальным разработчиком Java в компании Sun Microsystems?;Алан Тьюринг%false|Бьярне Страуструп%false|Джеймс Гослинг%true
