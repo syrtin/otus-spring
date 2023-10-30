@@ -3,7 +3,6 @@ package ru.otus.hw.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.otus.hw.config.TestConfig;
@@ -22,9 +21,6 @@ public class TestServiceImplTest {
 
     @Autowired
     private TestConfig testConfig;
-
-    @MockBean
-    private CommandLineRunner commandLineRunner;
 
     @MockBean
     private LocalizedIOService localizedIOService;

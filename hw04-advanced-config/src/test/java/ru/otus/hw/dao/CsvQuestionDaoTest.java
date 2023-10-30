@@ -3,7 +3,6 @@ package ru.otus.hw.dao;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.otus.hw.config.AppConfig;
@@ -19,9 +18,6 @@ import static org.mockito.Mockito.when;
 public class CsvQuestionDaoTest {
     private static final String TEST_FILE_RIGHT_NAME = "test_en.csv";
     private static final String TEST_FILE_WRONG_NAME = "test_en_wrong.csv";
-
-    @MockBean
-    private CommandLineRunner commandLineRunner;
 
     @MockBean
     private AppConfig appConfig;

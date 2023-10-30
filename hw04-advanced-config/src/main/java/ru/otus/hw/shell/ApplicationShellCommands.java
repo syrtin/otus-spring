@@ -27,16 +27,16 @@ public class ApplicationShellCommands {
     public String login(@ShellOption(defaultValue = "anonymous ") String firstName,
                         @ShellOption(defaultValue = "guest") String lastName) {
         student = studentService.determineCurrentStudent();
-        return String.format(localizedIOService.getMessage("shell.welcome", student.getFullName()));
+        return localizedIOService.getMessage("shell.welcome", student.getFullName());
     }
 
     @ShellMethod(value = "Start Test command", key = {"s", "start"})
-    @ShellMethodAvailability(value = "isPublishEventCommandAvailable")
+    @ShellMethodAvailability(value = "isTestRunAvailable")
     public void start() {
         testRunnerService.run(student);
     }
 
-    private Availability isPublishEventCommandAvailable() {
+    private Availability isTestRunAvailable() {
         return (student == null) ? Availability.unavailable(localizedIOService.getMessage("shell.needLogin"))
                 : Availability.available();
     }
