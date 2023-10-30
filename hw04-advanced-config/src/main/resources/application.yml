@@ -1,0 +1,9 @@
+test:
+  rightAnswersCountToPass: 3
+  locale: ru_RU
+  testFileName: questions_${test.locale}.csv
+
+spring:
+  messages:
+    basename: "i18n/messages"
+    encoding: UTF-8
