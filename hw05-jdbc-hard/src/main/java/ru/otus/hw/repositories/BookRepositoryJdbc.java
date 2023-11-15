@@ -1,6 +1,8 @@
 package ru.otus.hw.repositories;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -15,6 +17,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,32 +32,21 @@ public class BookRepositoryJdbc implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        var sql = "select b.id, b.title, a.id as author_id, a.full_name " +
-                  "from books b  join authors a on b.author_id = a.id where b.id = :id";
+        var sql = "select b.id, b.title, a.id as author_id, a.full_name, g.id as genre_id, g.name as genre_name " +
+                  "from books b " +
+                  "join authors a on b.author_id = a.id " +
+                  "left join books_genres bg on bg.book_id = b.id " +
+                  "left join genres g on g.id = bg.genre_id " +
+                  "where b.id = :id";
         var params = Map.of("id", id);
 
-        var books = namedParameterJdbcOperations.query(sql, params, new BookRowMapper());
+        var books = namedParameterJdbcOperations.query(sql, params, new BookResultSetExtractor());
 
         if (books.isEmpty()) {
             return Optional.empty();
         } else {
-            var book = books.get(0);
-            var genres = getGenresByBookId(book.getId());
-            book.setGenres(genres);
-            return Optional.of(book);
+            return Optional.of(books.get(0));
         }
-    }
-
-    private List<Genre> getGenresByBookId(long bookId) {
-        var sql = "select g.id, g.name " +
-                  "from genres g " +
-                  "join books_genres br on g.id = br.genre_id " +
-                  "where br.book_id = :bookId";
-
-        var params = Map.of("bookId", bookId);
-
-        return namedParameterJdbcOperations.query(sql, params, (rs, rowNum) ->
-                new Genre(rs.getLong("id"), rs.getString("name")));
     }
 
     @Override
@@ -172,6 +164,29 @@ public class BookRepositoryJdbc implements BookRepository {
                     rs.getString("full_name"));
 
             return new Book(id, title, author, new ArrayList<>());
+        }
+    }
+
+    @SuppressWarnings("ClassCanBeRecord")
+    @RequiredArgsConstructor
+    private static class BookResultSetExtractor implements ResultSetExtractor<List<Book>> {
+        @Override
+        public List<Book> extractData(ResultSet rs) throws SQLException, DataAccessException {
+            Map<Long, Book> bookMap = new HashMap<>();
+            RowMapper<Book> bookRowMapper = new BookRowMapper();
+
+            while (rs.next()) {
+                long bookId = rs.getLong("id");
+
+                Book book = bookMap.get(bookId);
+                if (book == null) {
+                    book = bookRowMapper.mapRow(rs, 0);
+                    bookMap.put(bookId, book);
+                }
+                book.getGenres().add(new Genre(rs.getLong("genre_id"), rs.getString("genre_name")));
+            }
+
+            return new ArrayList<>(bookMap.values());
         }
     }
 
