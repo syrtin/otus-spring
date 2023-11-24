@@ -1,7 +1,9 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.repositories.AuthorRepository;
@@ -23,26 +25,37 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Book> findById(long id) {
-        return bookRepository.findById(id);
+        var book = bookRepository.findById(id);
+        book.ifPresent(b -> Hibernate.initialize(b.getGenres()));
+        return book;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Book> findAll() {
-        return bookRepository.findAll();
+        List<Book> books = bookRepository.findAll();
+        for (Book book : books) {
+            Hibernate.initialize(book.getGenres());
+        }
+        return books;
     }
 
     @Override
+    @Transactional
     public Book insert(String title, long authorId, List<Long> genresIds) {
         return save(0, title, authorId, genresIds);
     }
 
     @Override
+    @Transactional
     public Book update(long id, String title, long authorId, List<Long> genresIds) {
         return save(id, title, authorId, genresIds);
     }
 
     @Override
+    @Transactional
     public void deleteById(long id) {
         bookRepository.deleteById(id);
     }
