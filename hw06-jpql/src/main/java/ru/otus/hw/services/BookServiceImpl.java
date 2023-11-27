@@ -1,9 +1,10 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.repositories.AuthorRepository;
@@ -12,6 +13,7 @@ import ru.otus.hw.repositories.GenreRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 
@@ -24,33 +26,33 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
+    private final ModelMapper modelMapper;
+
     @Override
     @Transactional(readOnly = true)
-    public Optional<Book> findById(long id) {
-        var book = bookRepository.findById(id);
-        book.ifPresent(b -> Hibernate.initialize(b.getGenres()));
-        return book;
+    public Optional<BookDto> findById(long id) {
+        Optional<Book> bookOptional = bookRepository.findById(id);
+        return bookOptional.map(b -> modelMapper.map(b, BookDto.class));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Book> findAll() {
+    public List<BookDto> findAll() {
         List<Book> books = bookRepository.findAll();
-        for (Book book : books) {
-            Hibernate.initialize(book.getGenres());
-        }
-        return books;
+        return books.stream()
+                .map(b -> modelMapper.map(b, BookDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public Book insert(String title, long authorId, List<Long> genresIds) {
+    public BookDto insert(String title, long authorId, List<Long> genresIds) {
         return save(0, title, authorId, genresIds);
     }
 
     @Override
     @Transactional
-    public Book update(long id, String title, long authorId, List<Long> genresIds) {
+    public BookDto update(long id, String title, long authorId, List<Long> genresIds) {
         return save(id, title, authorId, genresIds);
     }
 
@@ -60,7 +62,7 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteById(id);
     }
 
-    private Book save(long id, String title, long authorId, List<Long> genresIds) {
+    private BookDto save(long id, String title, long authorId, List<Long> genresIds) {
         var author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new EntityNotFoundException("Author with id %d not found".formatted(authorId)));
         var genres = genreRepository.findAllByIds(genresIds);
@@ -68,6 +70,6 @@ public class BookServiceImpl implements BookService {
             throw new EntityNotFoundException("Genres with ids %s not found".formatted(genresIds));
         }
         var book = new Book(id, title, author, genres);
-        return bookRepository.save(book);
+        return modelMapper.map(bookRepository.save(book), BookDto.class);
     }
 }

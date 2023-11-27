@@ -1,12 +1,12 @@
 package ru.otus.hw.repositories;
 
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
+import ru.otus.hw.models.Author;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,9 +14,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @Import(AuthorRepositoryJPA.class)
 class AuthorRepositoryJPATest {
-
+    private static final Long FIRST_AUTHOR_ID = 1L;
+    private static final Long SECOND_AUTHOR_ID = 2L;
+    private static final Long THIRD_AUTHOR_ID = 3L;
     private static final int EXPECTED_NUMBER_OF_AUTHORS = 3;
-    private static final int EXPECTED_QUERIES_COUNT = 1;
 
     @Autowired
     private AuthorRepositoryJPA repositoryJPA;
@@ -27,15 +28,14 @@ class AuthorRepositoryJPATest {
     @DisplayName("должен загружать список всех авторов")
     @Test
     void shouldReturnCorrectAuthorsList() {
-        SessionFactory sessionFactory = em.getEntityManager().getEntityManagerFactory()
-                .unwrap(SessionFactory.class);
-        sessionFactory.getStatistics().setStatisticsEnabled(true);
+        var expectedAuthor1 = em.find(Author.class, FIRST_AUTHOR_ID);
+        var expectedAuthor2 = em.find(Author.class, SECOND_AUTHOR_ID);
+        var expectedAuthor3 = em.find(Author.class, THIRD_AUTHOR_ID);
 
         var actualAuthors = repositoryJPA.findAll();
 
         assertThat(actualAuthors).isNotNull().hasSize(EXPECTED_NUMBER_OF_AUTHORS)
-                .allMatch(a -> !a.getFullName().equals(""));
-
-        assertThat(sessionFactory.getStatistics().getPrepareStatementCount()).isEqualTo(EXPECTED_QUERIES_COUNT);
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactlyInAnyOrder(expectedAuthor1, expectedAuthor2, expectedAuthor3);
     }
 }

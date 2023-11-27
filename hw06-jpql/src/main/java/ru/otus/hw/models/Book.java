@@ -14,16 +14,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -37,7 +38,7 @@ public class Book {
     @Column(name = "title", nullable = false, unique = true)
     private String title;
 
-    @ManyToOne(targetEntity = Author.class, cascade = CascadeType.PERSIST)
+    @ManyToOne(targetEntity = Author.class, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "author_id")
     private Author author;
 

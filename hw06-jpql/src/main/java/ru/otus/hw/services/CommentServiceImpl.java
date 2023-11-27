@@ -1,9 +1,10 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.repositories.BookRepository;
@@ -11,6 +12,7 @@ import ru.otus.hw.repositories.CommentRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -19,34 +21,36 @@ public class CommentServiceImpl implements CommentService {
 
     private final BookRepository bookRepository;
 
+    private final ModelMapper modelMapper;
+
     @Override
     @Transactional(readOnly = true)
-    public Optional<Comment> findById(long id) {
-        var comment = commentRepository.findById(id);
-        comment.ifPresent(c -> Hibernate.initialize(c.getBook()));
-        return comment;
+    public Optional<CommentDto> findById(long id) {
+        return commentRepository.findById(id)
+                .map(comment -> modelMapper.map(comment, CommentDto.class));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Comment> getByBookId(long bookId) {
+    public List<CommentDto> getByBookId(long bookId) {
         List<Comment> comments = commentRepository.getByBookId(bookId);
-        for (Comment comment : comments) {
-            Hibernate.initialize(comment.getBook());
-        }
-        return comments;
+        return comments.stream()
+                .map(comment -> modelMapper.map(comment, CommentDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public Comment insert(String text, long bookId) {
-        return save(0, text, bookId);
+    public CommentDto insert(String text, long bookId) {
+        Comment comment = save(0, text, bookId);
+        return modelMapper.map(comment, CommentDto.class);
     }
 
     @Override
     @Transactional
-    public Comment update(long id, String text, long bookId) {
-        return save(id, text, bookId);
+    public CommentDto update(long id, String text, long bookId) {
+        Comment comment = save(id, text, bookId);
+        return modelMapper.map(comment, CommentDto.class);
     }
 
     @Override

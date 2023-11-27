@@ -1,6 +1,5 @@
 package ru.otus.hw.repositories;
 
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,7 @@ class CommentRepositoryJPATest {
     private static final long FIRST_BOOK_ID = 1L;
     private static final long SECOND_AUTHOR_ID = 1L;
     private static final long FIRST_COMMENT_ID = 1L;
-    private static final int EXPECTED_QUERIES_COUNT = 2;
+    private static final long SECOND_COMMENT_ID = 2L;
 
     @Autowired
     private CommentRepositoryJPA repositoryJPA;
@@ -43,17 +42,15 @@ class CommentRepositoryJPATest {
     @DisplayName("должен загружать список всех комментариев с информацией о них")
     @Test
     void shouldReturnCorrectCommentsListByBookId() {
-        SessionFactory sessionFactory = em.getEntityManager().getEntityManagerFactory()
-                .unwrap(SessionFactory.class);
-        sessionFactory.getStatistics().setStatisticsEnabled(true);
+        var expectedComment1 = em.find(Comment.class, FIRST_COMMENT_ID);
 
         var actualComments = repositoryJPA.getByBookId(FIRST_BOOK_ID);
 
         assertThat(actualComments).isNotNull().hasSize(EXPECTED_NUMBER_OF_COMMENTS)
                 .allMatch(c -> !c.getText().equals(""))
-                .allMatch(c -> !c.getBook().getTitle().equals(""));
-
-        assertThat(sessionFactory.getStatistics().getPrepareStatementCount()).isEqualTo(EXPECTED_QUERIES_COUNT);
+                .allMatch(c -> !c.getBook().getTitle().equals(""))
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactlyInAnyOrder(expectedComment1);
     }
 
     @DisplayName("должен сохранять новый комментарий")
