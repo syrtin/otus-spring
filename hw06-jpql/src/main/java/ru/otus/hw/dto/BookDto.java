@@ -1,7 +1,6 @@
 package ru.otus.hw.dto;
 
 import lombok.Data;
-import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Genre;
 
 import java.util.List;
@@ -12,7 +11,7 @@ public class BookDto {
 
     private String title;
 
-    private Author author;
+    private AuthorDto author;
 
     private List<Genre> genres;
 }

@@ -19,7 +19,7 @@ public class AuthorCommands {
     @ShellMethod(value = "Find all authors", key = "aa")
     public String findAllAuthors() {
         return authorService.findAll().stream()
-                .map(authorConverter::authorToString)
+                .map(authorConverter::authorDtoToString)
                 .collect(Collectors.joining("," + System.lineSeparator()));
     }
 }
