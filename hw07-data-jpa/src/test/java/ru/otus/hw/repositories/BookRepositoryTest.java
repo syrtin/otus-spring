@@ -23,6 +23,15 @@ class BookRepositoryTest {
     @Autowired
     private TestEntityManager em;
 
+    @DisplayName("должен загружать книгу по id")
+    @Test
+    void shouldReturnCorrectBookById() {
+        var expectedBook = em.find(Book.class, FIRST_BOOK_ID);
+        var optionalActualBook = repository.findById(FIRST_BOOK_ID);
+        assertThat(optionalActualBook).isPresent().get()
+                .usingRecursiveComparison().isEqualTo(expectedBook);
+    }
+
     @DisplayName("должен загружать список всех книг с полной информацией о них")
     @Test
     void shouldReturnCorrectBooksList() {
