@@ -4,22 +4,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import ru.otus.hw.models.Genre;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static ru.otus.hw.changelogsTest.InitMongoDBDataChangeLog.FIRST_GENRE_ID;
+import static ru.otus.hw.changelogsTest.InitMongoDBDataChangeLog.SECOND_GENRE_ID;
 
 @DisplayName("Репозиторий на основе JPA для работы с книгами ")
 @DataMongoTest
 class GenreRepositoryTest {
 
     private static final int EXPECTED_NUMBER_OF_GENRES_BY_IDS = 2;
-    private static final String FIRST_GENRE_ID = "1";
-    private static final String SECOND_GENRE_ID = "2";
 
     @Autowired
     private GenreRepository repository;

@@ -31,14 +31,14 @@ public class BookCommands {
                 .orElse("Book with id %s not found".formatted(id));
     }
 
-    //bins aaaaaaaaaaaaa 1 1,6
+    //bins InsTitle 6577717472d96e731d5b9c3a 6577717472d96e731d5b9c3b,6577717472d96e731d5b9c3c
     @ShellMethod(value = "Insert book", key = "bins")
     public String insertBook(String title, String authorId, List<String> genresIds) {
         var savedBook = bookService.insert(title, authorId, genresIds);
         return bookConverter.bookDtoToString(savedBook);
     }
 
-    //bupd 4 dfasdfasdfasd 3 2,5
+    //bupd 6577717472d96e731d5b9c3d UpdTitle 6577717472d96e731d5b9c3e 6577717472d96e731d5b9c3f,6577717472d96e731d5b9c3g
     @ShellMethod(value = "Update book", key = "bupd")
     public String updateBook(String id, String title, String authorId, List<String> genresIds) {
         var savedBook = bookService.update(id, title, authorId, genresIds);

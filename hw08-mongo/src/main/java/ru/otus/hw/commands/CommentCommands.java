@@ -16,7 +16,7 @@ public class CommentCommands {
 
     private final CommentConverter commentConverter;
 
-    //ac 1
+    //ac 6577717472d96e731d5b9c3a
     @ShellMethod(value = "Find all comments", key = "ac")
     public String findAllCommentsByBookId(String bookId) {
         return commentService.getByBookId(bookId).stream()
@@ -31,14 +31,14 @@ public class CommentCommands {
                 .orElse("Comment with id %s not found".formatted(id));
     }
 
-    //cins aaaaaaaaaaaaa 1
+    //cins InsText 6577717472d96e731d5b9c3b
     @ShellMethod(value = "Insert comment", key = "cins")
     public String insertComment(String text, String bookId) {
         var savedComment = commentService.insert(text, bookId);
         return commentConverter.commentDtoToString(savedComment);
     }
 
-    //cupd 4 dfasdfasdfasd 3
+    //cupd 6577717472d96e731d5b9c3c UpdText 6577717472d96e731d5b9c3d
     @ShellMethod(value = "Update comment", key = "cupd")
     public String updateComment(String id, String text, String bookId) {
         var savedComment = commentService.update(id, text, bookId);
