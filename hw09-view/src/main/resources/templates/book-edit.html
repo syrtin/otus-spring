@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Book</title>
+    <link type="text/css" rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+<div class="container">
+    <h1>Edit Book</h1>
+    <form th:action="@{/books/edit(id=${book.id})}" method="post" th:object="${book}">
+        <table>
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genres</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <input type="text" th:field="*{title}" />
+                </td>
+                <td>
+                    <select th:field="*{author}">
+                        <option th:each="author : ${authors}" th:value="${author.id}" th:text="${author.fullName}"></option>
+                    </select>
+                </td>
+                <td>
+                    <select multiple="multiple" th:field="*{genres}">
+                        <option th:each="genre : ${genres}" th:value="${genre.id}" th:text="${genre.name}"></option>
+                    </select>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <button type="submit" class="save-btn">
+            <i class="fas fa-save"></i>
+            <span class="save-btn-text">Save</span>
+        </button>
+    </form>
+</div>
+</body>
+</html>
