@@ -35,8 +35,7 @@
                 <span th:each="genre : ${book.genres}" th:text="${genre.name} + ' '"></span>
             </td>
             <td>
-                <form action="/books/edit" method="get" style="display: inline;">
-                    <input type="hidden" name="id" th:value="${book.id}">
+                <form th:action="@{'/books/' + ${book.id} + '/edit'}" th:method="get" style="display: inline;">
                     <button class="edit-btn" type="submit">
                         <i class="fas fa-edit"></i>
                     </button>
@@ -51,8 +50,7 @@
         </tbody>
     </table>
     <div style="text-align: center;">
-        <form action="/books/edit" method="get" style="display: inline;">
-            <input type="hidden" name="id" th:value="null">
+        <form th:action="@{/books/new}" method="get" style="display: inline;">
             <button class="add-btn" type="submit">
                 <i class="fas fa-plus"></i>
                 <span class="add-btn-text">Add new book</span>

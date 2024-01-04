@@ -102,8 +102,7 @@ public class BookControllerTest {
 
         when(bookService.update(anyString(), anyString(), anyString(), anyList())).thenReturn(bookDto);
 
-        mockMvc.perform(post(BASE_URL + "/edit")
-                        .param("id", FIRST_BOOK_ID)
+        mockMvc.perform(post(BASE_URL + "/{id}" + "/edit", FIRST_BOOK_ID)
                         .flashAttr("book", bookDto))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/books"));
@@ -128,16 +127,8 @@ public class BookControllerTest {
         given(authorService.findAll()).willReturn(authors);
         given(genreService.findAll()).willReturn(genres);
 
-        mockMvc.perform(get(BASE_URL + "/edit").param("id", ""))
-                .andExpect(status().isOk())
-                .andExpect(view().name("book-edit"))
-                .andExpect(model().attributeExists("authors"))
-                .andExpect(model().attributeExists("genres"))
-                .andExpect(model().attributeExists("book"))
-                .andExpect(model().attribute("book", hasProperty("id", nullValue())))
-                .andExpect(model().attribute("book", hasProperty("title", nullValue())))
-                .andExpect(model().attribute("book", hasProperty("author", nullValue())))
-                .andExpect(model().attribute("book", hasProperty("genres", nullValue())));
+        mockMvc.perform(get(BASE_URL + "/{id}/edit", ""))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -148,7 +139,7 @@ public class BookControllerTest {
         given(authorService.findAll()).willReturn(new ArrayList<>());
         given(genreService.findAll()).willReturn(new ArrayList<>());
 
-        mockMvc.perform(get(BASE_URL + "/edit").param("id", FIRST_BOOK_ID))
+        mockMvc.perform(get(BASE_URL + "/{id}/edit", FIRST_BOOK_ID))
                 .andExpect(status().isOk())
                 .andExpect(view().name("book-edit"))
                 .andExpect(model().attributeExists("authors"))

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.models.Genre;
@@ -19,6 +18,7 @@ import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.CommentService;
 import ru.otus.hw.services.GenreService;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,38 +35,50 @@ public class BookController {
 
     private final CommentService commentService;
 
-    @GetMapping("/books/edit")
-    public String showEditForm(@RequestParam("id") String id, Model model) {
-        var authors = this.authorService.findAll();
+    @GetMapping("/books/{id}/edit")
+    public String showEditForm(@PathVariable String id, Model model) {
+        List<AuthorDto> authors = this.authorService.findAll();
         model.addAttribute("authors", authors);
         var genres = this.genreService.findAll();
         model.addAttribute("genres", genres);
 
-        BookDto book;
-        if (id.isEmpty()) {
-            book = new BookDto();
-        } else {
-            Optional<BookDto> bookOptional = bookService.findById(id);
-            if (bookOptional.isEmpty()) {
-                return "not-found";
-            }
-            book = bookOptional.get();
+        Optional<BookDto> bookOptional = bookService.findById(id);
+        if (bookOptional.isEmpty()) {
+            return "not-found";
         }
+        var book = bookOptional.get();
 
         model.addAttribute("book", book);
         return "book-edit";
     }
 
-    @PostMapping("/books/edit")
-    public String editBook(@RequestParam("id") String id, @ModelAttribute(value = "book") BookDto book) {
+    @GetMapping("/books/new")
+    public String showNewForm(Model model) {
+        var authors = this.authorService.findAll();
+        model.addAttribute("authors", authors);
+        var genres = this.genreService.findAll();
+        model.addAttribute("genres", genres);
+
+        BookDto book = new BookDto();
+        model.addAttribute("book", book);
+        return "book-new";
+    }
+
+    @PostMapping("/books/{id}/edit")
+    public String editBook(@PathVariable String id, @ModelAttribute(value = "book") BookDto book) {
         var title = book.getTitle();
         var authorId = book.getAuthor().getId();
         var genresIds = book.getGenres().stream().map(Genre::getId).collect(Collectors.toList());
-        if (id == null || id.isEmpty()) {
-            bookService.insert(title, authorId, genresIds);
-        } else {
-            bookService.update(id, title, authorId, genresIds);
-        }
+        bookService.update(id, title, authorId, genresIds);
+        return "redirect:/books";
+    }
+
+    @PostMapping("/books/new")
+    public String createBook(@ModelAttribute(value = "book") BookDto book) {
+        var title = book.getTitle();
+        var authorId = book.getAuthor().getId();
+        var genresIds = book.getGenres().stream().map(Genre::getId).collect(Collectors.toList());
+        bookService.insert(title, authorId, genresIds);
         return "redirect:/books";
     }
 
