@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Book List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link type="text/css" rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Book List</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Genres</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="book : ${books}">
+            <td>
+                <a th:href="@{/books/{id}(id=${book.id})}">
+                    <span th:text="${book.id}"></span>
+                </a>
+            </td>
+            <td>
+                <a th:href="@{/books/{id}(id=${book.id})}">
+                    <span th:text="${book.title}"></span>
+                </a>
+            </td>
+            <td th:text="${book.author.fullName}"></td>
+            <td>
+                <span th:each="genre : ${book.genres}" th:text="${genre.name} + ' '"></span>
+            </td>
+            <td>
+                <form th:action="@{'/books/' + ${book.id} + '/edit'}" th:method="get" style="display: inline;">
+                    <button class="edit-btn" type="submit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </form>
+                <form th:action="@{'/books/' + ${book.id}}" th:method="delete" style="display: inline;">
+                    <button class="delete-btn" type="submit">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div style="text-align: center;">
+        <form th:action="@{/books/new}" method="get" style="display: inline;">
+            <button class="add-btn" type="submit">
+                <i class="fas fa-plus"></i>
+                <span class="add-btn-text">Add new book</span>
+            </button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
