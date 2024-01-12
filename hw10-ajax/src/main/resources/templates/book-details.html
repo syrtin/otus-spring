@@ -1,43 +1,114 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <title>Book Details</title>
-    <link type="text/css" rel="stylesheet" th:href="@{/css/styles.css}">
+    <link type="text/css" rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
 <div class="container">
     <h1>Book Details</h1>
-    <div th:if="${book}">
-        <table>
-            <thead>
-            <tr>
-                <th>ID:</th>
-                <td><span th:text="${book.id}"></span></td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <th>Title:</th>
-                <td><span th:text="${book.title}"></span></td>
-            </tr>
-            <tr>
-                <th>Author:</th>
-                <td><span th:text="${book.author.fullName}"></span></td>
-            </tr>
-            <tr>
-                <th>Genres:</th>
-                <td>
-                    <span th:each="genre : ${book.genres}" th:text="${genre.name} + ' '"></span>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+    <div id="book-details"></div>
     <h2>Related comments</h2>
-    <div th:each="comment : ${comments}">
-        <p class="comment-id"><b>ID: </b><span th:text="${comment.id}"></span></p>
-        <p class="comment-text"><b>Text: </b><span th:text="${comment.text}"></span></p>
-    </div>
+    <div id="comments"></div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', loadBookDetails);
+
+    function loadBookDetails() {
+        const bookId = "[[${bookId}]]";
+        fetch(`/api/books/${bookId}`)
+            .then(response => response.json())
+            .then(book => {
+                const bookDetails = document.getElementById('book-details');
+                bookDetails.innerHTML = '';
+
+                const table = document.createElement('table');
+                const tableHead = document.createElement('thead');
+                const tableBody = document.createElement('tbody');
+
+                const idRow = document.createElement('tr');
+                const idLabel = document.createElement('th');
+                idLabel.textContent = 'ID:';
+                const idValue = document.createElement('td');
+                idValue.textContent = book.id;
+                idRow.appendChild(idLabel);
+                idRow.appendChild(idValue);
+                tableHead.appendChild(idRow);
+
+                const titleRow = document.createElement('tr');
+                const titleLabel = document.createElement('th');
+                titleLabel.textContent = 'Title:';
+                const titleValue = document.createElement('td');
+                titleValue.textContent = book.title;
+                titleRow.appendChild(titleLabel);
+                titleRow.appendChild(titleValue);
+                tableBody.appendChild(titleRow);
+
+                const authorRow = document.createElement('tr');
+                const authorLabel = document.createElement('th');
+                authorLabel.textContent = 'Author:';
+                const authorValue = document.createElement('td');
+                authorValue.textContent = book.author.fullName;
+                authorRow.appendChild(authorLabel);
+                authorRow.appendChild(authorValue);
+                tableBody.appendChild(authorRow);
+
+                const genresRow = document.createElement('tr');
+                const genresLabel = document.createElement('th');
+                genresLabel.textContent = 'Genres:';
+                const genresValue = document.createElement('td');
+                book.genres.forEach(genre => {
+                    const genreSpan = document.createElement('span');
+                    genreSpan.textContent = genre.name + ' ';
+                    genresValue.appendChild(genreSpan);
+                });
+                genresRow.appendChild(genresLabel);
+                genresRow.appendChild(genresValue);
+                tableBody.appendChild(genresRow);
+
+                table.appendChild(tableHead);
+                table.appendChild(tableBody);
+                bookDetails.appendChild(table);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function loadComments() {
+        const bookId = "[[${bookId}]]";
+        fetch(`/api/books/${bookId}/comments`)
+            .then(response => response.json())
+            .then(comments => {
+                const commentsContainer = document.getElementById('comments');
+                commentsContainer.innerHTML = '';
+
+                comments.forEach(comment => {
+                    const commentId = document.createElement('p');
+                    commentId.classList.add('comment-id')
+                    const commentIdLabel = document.createElement('b');
+                    commentIdLabel.textContent = 'ID: ';
+                    const commentIdValue = document.createElement('span');
+                    commentIdValue.textContent = comment.id;
+                    commentId.appendChild(commentIdLabel);
+                    commentId.appendChild(commentIdValue);
+
+                    const commentText = document.createElement('p');
+                    commentText.classList.add('comment-text')
+                    const commentTextLabel = document.createElement('b');
+                    commentTextLabel.textContent = 'Text: ';
+                    const commentTextValue = document.createElement('span');
+                    commentTextValue.textContent = comment.text;
+                    commentText.appendChild(commentTextLabel);
+                    commentText.appendChild(commentTextValue);
+
+                    commentsContainer.appendChild(commentId);
+                    commentsContainer.appendChild(commentText);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    document.addEventListener('DOMContentLoaded', loadComments);
+</script>
 </body>
 </html>

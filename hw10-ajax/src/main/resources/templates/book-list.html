@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <title>Book List</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link type="text/css" rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
 <div class="container">
     <h1>Book List</h1>
-    <table>
+    <table id="book-table">
         <thead>
         <tr>
             <th>ID</th>
@@ -18,45 +18,104 @@
             <th></th>
         </tr>
         </thead>
-        <tbody>
-        <tr th:each="book : ${books}">
-            <td>
-                <a th:href="@{/books/{id}(id=${book.id})}">
-                    <span th:text="${book.id}"></span>
-                </a>
-            </td>
-            <td>
-                <a th:href="@{/books/{id}(id=${book.id})}">
-                    <span th:text="${book.title}"></span>
-                </a>
-            </td>
-            <td th:text="${book.author.fullName}"></td>
-            <td>
-                <span th:each="genre : ${book.genres}" th:text="${genre.name} + ' '"></span>
-            </td>
-            <td>
-                <form th:action="@{'/books/' + ${book.id} + '/edit'}" th:method="get" style="display: inline;">
-                    <button class="edit-btn" type="submit">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                </form>
-                <form th:action="@{'/books/' + ${book.id}}" th:method="delete" style="display: inline;">
-                    <button class="delete-btn" type="submit">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </form>
-            </td>
-        </tr>
+        <tbody id="book-table-body">
         </tbody>
     </table>
     <div style="text-align: center;">
-        <form th:action="@{/books/new}" method="get" style="display: inline;">
-            <button class="add-btn" type="submit">
-                <i class="fas fa-plus"></i>
-                <span class="add-btn-text">Add new book</span>
-            </button>
-        </form>
+        <button class="add-btn" id="add-book-btn">
+            <i class="fas fa-plus"></i>
+            <span class="add-btn-text">Add new book</span>
+        </button>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', loadBooks);
+
+    function loadBooks() {
+        fetch('/api/books')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('book-table-body');
+                tableBody.innerHTML = '';
+
+                data.forEach(book => {
+                    const row = document.createElement('tr');
+
+                    const idCell = document.createElement('td');
+                    const idLink = document.createElement('a');
+                    idLink.href = `/books/${book.id}`;
+                    idLink.innerText = book.id;
+                    idCell.appendChild(idLink);
+                    row.appendChild(idCell);
+
+                    const titleCell = document.createElement('td');
+                    const titleLink = document.createElement('a');
+                    titleLink.href = `/books/${book.id}`;
+                    titleLink.innerText = book.title;
+                    titleCell.appendChild(titleLink);
+                    row.appendChild(titleCell);
+
+                    const authorCell = document.createElement('td');
+                    authorCell.innerText = book.author.fullName;
+                    row.appendChild(authorCell);
+
+                    const genresCell = document.createElement('td');
+                    book.genres.forEach(genre => {
+                        const genreSpan = document.createElement('span');
+                        genreSpan.innerText = genre.name + ' ';
+                        genresCell.appendChild(genreSpan);
+                    });
+                    row.appendChild(genresCell);
+
+                    const actionsCell = document.createElement('td');
+                    const editButtonForm = document.createElement('form');
+                    editButtonForm.action = `/books/${book.id}/edit`;
+                    editButtonForm.method = 'get';
+                    editButtonForm.style.display = 'inline';
+                    const editButton = document.createElement('button');
+                    editButton.className = 'edit-btn';
+                    editButton.type = 'submit';
+                    const editIcon = document.createElement('i');
+                    editIcon.className = 'fas fa-edit';
+                    editButton.appendChild(editIcon);
+                    editButtonForm.appendChild(editButton);
+                    actionsCell.appendChild(editButtonForm);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.className = 'delete-btn';
+                    const deleteIcon = document.createElement('i');
+                    deleteIcon.className = 'fas fa-trash-alt';
+                    deleteButton.appendChild(deleteIcon);
+                    actionsCell.appendChild(deleteButton);
+                    row.appendChild(actionsCell);
+                    tableBody.appendChild(row);
+                    deleteButton.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        const bookId = book.id;
+                        fetch(`api/books/${bookId}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    location.reload();
+                                } else {
+                                    console.error('Error deleting book');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                    });
+
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    const addBookBtn = document.getElementById('add-book-btn');
+    addBookBtn.addEventListener('click', () => {
+        window.location.href = '/books/new';
+    });
+</script>
 </body>
 </html>

@@ -35,9 +35,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<BookDto> findById(String id) {
+    public BookDto findById(String id) {
         Optional<Book> bookOptional = bookRepository.findById(id);
-        return bookOptional.map(b -> modelMapper.map(b, BookDto.class));
+        return bookOptional.map(b -> modelMapper.map(b, BookDto.class))
+                .orElseThrow(() -> new EntityNotFoundException("Book with id %s not found".formatted(id)));
     }
 
     @Override
