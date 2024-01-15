@@ -27,8 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(BookController.class)
 public class BookControllerTest {
     private static final String BOOK_URL = "/api/books";
-    private static final String AUTHORS_URL = "/api/authors";
-    private static final String GENRES_URL = "/api/genres";
     private static final String COMMENTS = "/comments";
     public static final String FIRST_BOOK_ID = ObjectId.get().toString();
     public static final String SECOND_BOOK_ID = ObjectId.get().toString();
@@ -53,12 +51,6 @@ public class BookControllerTest {
 
     @MockBean
     private BookService bookService;
-
-    @MockBean
-    private AuthorService authorService;
-
-    @MockBean
-    private GenreService genreService;
 
     @MockBean
     private CommentService commentService;
@@ -127,28 +119,6 @@ public class BookControllerTest {
         mockMvc.perform(delete(BOOK_URL + "/{id}", FIRST_BOOK_ID))
                 .andExpect(status().isOk());
         verify(bookService).deleteById(FIRST_BOOK_ID);
-    }
-
-    @Test
-    public void testGetAllAuthors() throws Exception {
-        var authors = List.of(new AuthorDto(FIRST_AUTHOR_ID, FIRST_AUTHOR_FULLNAME));
-
-        given(authorService.findAll()).willReturn(authors);
-
-        mockMvc.perform(get(AUTHORS_URL))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(authors)));
-    }
-
-    @Test
-    public void testGetAllGenres() throws Exception {
-        var genres = List.of(new Genre(FIRST_GENRE_ID, FIRST_GENRE_NAME));
-
-        given(genreService.findAll()).willReturn(genres);
-
-        mockMvc.perform(get(GENRES_URL))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(genres)));
     }
 
     @Test
