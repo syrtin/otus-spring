@@ -47,34 +47,35 @@ public class InitMongoDBDataChangeLog {
 
     @ChangeSet(order = "001", id = "insertAuthors", author = "syrtin", runAlways = true)
     public void insertAuthors(AuthorRepository repository) {
-        author1 = repository.save(new Author(ObjectId.get().toString(), "Author_1"));
-        author2 = repository.save(new Author(ObjectId.get().toString(), "Author_2"));
-        author3 = repository.save(new Author(ObjectId.get().toString(), "Author_3"));
+        author1 = repository.save(new Author(ObjectId.get().toString(), "Author_1")).block();
+        author2 = repository.save(new Author(ObjectId.get().toString(), "Author_2")).block();
+        author3 = repository.save(new Author(ObjectId.get().toString(), "Author_3")).block();
     }
 
     @ChangeSet(order = "002", id = "insertGenres", author = "syrtin", runAlways = true)
     public void insertGenres(GenreRepository repository) {
-        genre1 = repository.save(new Genre(ObjectId.get().toString(), "Genre_1"));
-        genre2 = repository.save(new Genre(ObjectId.get().toString(), "Genre_2"));
-        genre3 = repository.save(new Genre(ObjectId.get().toString(), "Genre_3"));
-        genre4 = repository.save(new Genre(ObjectId.get().toString(), "Genre_4"));
-        genre5 = repository.save(new Genre(ObjectId.get().toString(), "Genre_5"));
-        genre6 = repository.save(new Genre(ObjectId.get().toString(), "Genre_6"));
+        genre1 = repository.save(new Genre(ObjectId.get().toString(), "Genre_1")).block();
+        genre2 = repository.save(new Genre(ObjectId.get().toString(), "Genre_2")).block();
+        genre3 = repository.save(new Genre(ObjectId.get().toString(), "Genre_3")).block();
+        genre4 = repository.save(new Genre(ObjectId.get().toString(), "Genre_4")).block();
+        genre5 = repository.save(new Genre(ObjectId.get().toString(), "Genre_5")).block();
+        genre6 = repository.save(new Genre(ObjectId.get().toString(), "Genre_6")).block();
     }
 
     @ChangeSet(order = "003", id = "insertBooks", author = "syrtin", runAlways = true)
     public void insertBooks(BookRepository repository) {
         book1 = repository.save(new Book(ObjectId.get().toString(),
-                "BookTitle_1", author1, Arrays.asList(genre1, genre2)));
+                "BookTitle_1", author1, Arrays.asList(genre1, genre2))).block();
         book2 = repository.save(new Book(ObjectId.get().toString(),
-                "BookTitle_2", author2, Arrays.asList(genre3, genre4)));
-        repository.save(new Book(ObjectId.get().toString(), "BookTitle_3", author3, Arrays.asList(genre5, genre6)));
+                "BookTitle_2", author2, Arrays.asList(genre3, genre4))).block();
+        repository.save(new Book(ObjectId.get().toString(), "BookTitle_3", author3,
+                Arrays.asList(genre5, genre6))).block();
     }
 
     @ChangeSet(order = "004", id = "insertComments", author = "syrtin", runAlways = true)
     public void insertComments(CommentRepository repository) {
-        repository.save(new Comment(ObjectId.get().toString(), "Comment_1", book1));
-        repository.save(new Comment(ObjectId.get().toString(), "Comment_2", book2));
-        repository.save(new Comment(ObjectId.get().toString(), "Comment_3", book1));
+        repository.save(new Comment(ObjectId.get().toString(), "Comment_1", book1)).block();
+        repository.save(new Comment(ObjectId.get().toString(), "Comment_2", book2)).block();
+        repository.save(new Comment(ObjectId.get().toString(), "Comment_3", book1)).block();
     }
 }

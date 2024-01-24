@@ -1,30 +1,35 @@
 package ru.otus.hw.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.CommentDto;
+import ru.otus.hw.models.Author;
+import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Genre;
-import ru.otus.hw.services.AuthorService;
-import ru.otus.hw.services.BookService;
-import ru.otus.hw.services.CommentService;
-import ru.otus.hw.services.GenreService;
+import ru.otus.hw.repositories.AuthorRepository;
+import ru.otus.hw.repositories.BookRepository;
+import ru.otus.hw.repositories.CommentRepository;
+import ru.otus.hw.repositories.GenreRepository;
 
 import java.util.List;
 
-import static org.mockito.BDDMockito.given;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(BookController.class)
+@WebFluxTest(BookController.class)
 public class BookControllerTest {
     private static final String BOOK_URL = "/api/books";
     private static final String COMMENTS = "/comments";
@@ -44,109 +49,176 @@ public class BookControllerTest {
     public static final String SECOND_GENRE_NAME = "Genre 2";
 
     @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper mapper;
+    private WebTestClient webTestClient;
 
     @MockBean
-    private BookService bookService;
+    private AuthorRepository authorRepository;
 
     @MockBean
-    private CommentService commentService;
+    private CommentRepository commentRepository;
+
+    @MockBean
+    private GenreRepository genreRepository;
+
+    @MockBean
+    private BookRepository bookRepository;
+
+    @MockBean
+    private ModelMapper modelMapper;
 
     @Test
-    public void testGetAllBooks() throws Exception {
-        var bookDto1 = getBookDto(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
-        var bookDto2 = getBookDto(SECOND_BOOK_ID, SECOND_BOOK_TITLE);
-        var books = List.of(bookDto1, bookDto2);
+    public void testGetAllBooks() {
+        var book1 = getBookWithId(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
+        var book2 = getBookWithId(SECOND_BOOK_ID, SECOND_BOOK_TITLE);
+        var bookDto1 = getBookDtoWithId(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
+        var bookDto2 = getBookDtoWithId(SECOND_BOOK_ID, SECOND_BOOK_TITLE);
 
-        given(bookService.findAll()).willReturn(books);
+        when(bookRepository.findAll()).thenReturn(Flux.just(book1, book2));
+        when(modelMapper.map(book1, BookDto.class)).thenReturn(bookDto1);
+        when(modelMapper.map(book2, BookDto.class)).thenReturn(bookDto2);
 
-        mockMvc.perform(get(BOOK_URL))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(books)));
+        webTestClient.get().uri(BOOK_URL)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BookDto.class)
+                .hasSize(2)
+                .consumeWith(response -> {
+                    List<BookDto> bookDtoList = response.getResponseBody();
+                    assertThat(bookDtoList).contains(bookDto1, bookDto2);
+                });
     }
 
     @Test
-    public void testGetBookById() throws Exception {
-        var bookDto = getBookDto(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
+    public void testGetBookById() {
+        var bookDto = getBookDtoWithId(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
+        var book = getBookWithId(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
 
-        var comment1 = new CommentDto(FIRST_COMMENT_ID, FIRST_COMMENT_TEXT, bookDto);
-        var comment2 = new CommentDto(SECOND_COMMENT_ID, SECOND_COMMENT_TEXT, bookDto);
-        var comments = List.of(comment1, comment2);
+        when(bookRepository.findById(FIRST_BOOK_ID)).thenReturn(Mono.just(book));
+        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
 
-        given(commentService.getByBookId(FIRST_BOOK_ID)).willReturn(comments);
-        given(bookService.findById(FIRST_BOOK_ID)).willReturn(bookDto);
-
-        mockMvc.perform(get(BOOK_URL + "/{id}", FIRST_BOOK_ID))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(bookDto)));
+        webTestClient.get().uri(BOOK_URL + "/" + FIRST_BOOK_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BookDto.class)
+                .isEqualTo(bookDto);
     }
 
     @Test
-    public void testEditBook() throws Exception {
-        var bookDto = getBookDto(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
+    public void testEditBook() {
+        var book = getBookWithId(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
+        var bookDto = getBookDtoWithId(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
 
-        when(bookService.update(anyString(), anyString(), anyString(), anyList())).thenReturn(bookDto);
+        when(bookRepository.findById(FIRST_BOOK_ID)).thenReturn(Mono.just(book));
+        when(bookRepository.save(book)).thenReturn(Mono.just(book));
+        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
 
-        mockMvc.perform(put(BOOK_URL + "/{id}", FIRST_BOOK_ID)
+        when(authorRepository.findById(FIRST_AUTHOR_ID)).thenReturn(Mono.just(book.getAuthor()));
+        when(genreRepository.findAllByIdIn(List.of(FIRST_GENRE_ID, SECOND_GENRE_ID)))
+                .thenReturn(Flux.fromIterable(book.getGenres()));
+
+        webTestClient.put().uri(BOOK_URL + "/{id}", FIRST_BOOK_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(bookDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(bookDto)));
+                .body(BodyInserters.fromValue(bookDto))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BookDto.class)
+                .value(returnedDto -> {
+                    assertEquals(FIRST_BOOK_ID, returnedDto.getId());
+                    assertEquals(FIRST_BOOK_TITLE, returnedDto.getTitle());
+                    assertEquals(FIRST_AUTHOR_ID, returnedDto.getAuthor().getId());
+                    assertEquals(FIRST_GENRE_ID, returnedDto.getGenres().get(0).getId());
+                });
 
-        verify(bookService, times(1)).update(anyString(), anyString(), anyString(), anyList());
+        verify(bookRepository, times(1)).save(any(Book.class));
     }
 
     @Test
-    public void testNewBook() throws Exception {
-        var bookDto = getBookDto(FIRST_BOOK_TITLE);
+    public void testNewBook() {
+        var book = getBook(FIRST_BOOK_TITLE);
+        var bookDto = getBookDtoWithId(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
 
-        when(bookService.insert(anyString(), anyString(), anyList())).thenReturn(bookDto);
+        when(bookRepository.findById(FIRST_BOOK_ID)).thenReturn(Mono.just(book));
+        when(bookRepository.save(book)).thenReturn(Mono.just(book));
+        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
 
-        mockMvc.perform(post(BOOK_URL)
+        when(authorRepository.findById(FIRST_AUTHOR_ID)).thenReturn(Mono.just(book.getAuthor()));
+        when(genreRepository.findAllByIdIn(List.of(FIRST_GENRE_ID, SECOND_GENRE_ID)))
+                .thenReturn(Flux.fromIterable(book.getGenres()));
+
+        webTestClient.post().uri(BOOK_URL)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(bookDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(bookDto)));
-
-        verify(bookService, times(1)).insert(anyString(), anyString(), anyList());
+                .body(BodyInserters.fromValue(bookDto))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BookDto.class)
+                .value(returnedDto -> {
+                    assertEquals(FIRST_BOOK_ID, returnedDto.getId());
+                    assertEquals(FIRST_BOOK_TITLE, returnedDto.getTitle());
+                    assertEquals(FIRST_AUTHOR_ID, returnedDto.getAuthor().getId());
+                    assertEquals(FIRST_GENRE_ID, returnedDto.getGenres().get(0).getId());
+                });
+        verify(bookRepository, times(1)).save(any(Book.class));
     }
 
     @Test
-    public void testDeleteBook() throws Exception {
-        mockMvc.perform(delete(BOOK_URL + "/{id}", FIRST_BOOK_ID))
-                .andExpect(status().isOk());
-        verify(bookService).deleteById(FIRST_BOOK_ID);
+    public void testDeleteBook() {
+        when(commentRepository.deleteAllByBookId(FIRST_BOOK_ID)).thenReturn(Mono.empty());
+        when(bookRepository.deleteById(FIRST_BOOK_ID)).thenReturn(Mono.empty());
+
+        webTestClient.delete().uri(BOOK_URL + "/{id}", FIRST_BOOK_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Void.class);
+
+        verify(commentRepository).deleteAllByBookId(FIRST_BOOK_ID);
+        verify(bookRepository).deleteById(FIRST_BOOK_ID);
     }
 
     @Test
-    public void testGetAllComments() throws Exception {
-        var bookDto = getBookDto(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
+    public void testGetAllComments() {
+        var bookDto = getBookDtoWithId(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
+        var commentDto1 = new CommentDto(FIRST_COMMENT_ID, FIRST_COMMENT_TEXT, bookDto);
+        var commentDto2 = new CommentDto(SECOND_COMMENT_ID, SECOND_COMMENT_TEXT, bookDto);
 
-        var comment1 = new CommentDto(FIRST_COMMENT_ID, FIRST_COMMENT_TEXT, bookDto);
-        var comment2 = new CommentDto(SECOND_COMMENT_ID, SECOND_COMMENT_TEXT, bookDto);
-        var comments = List.of(comment1, comment2);
+        var book = getBookWithId(FIRST_BOOK_ID, FIRST_BOOK_TITLE);
+        var comment1 = new Comment(FIRST_COMMENT_ID, FIRST_COMMENT_TEXT, book);
+        var comment2 = new Comment(SECOND_COMMENT_ID, SECOND_COMMENT_TEXT, book);
 
-        given(commentService.getByBookId(FIRST_BOOK_ID)).willReturn(comments);
+        when(commentRepository.findAllByBookId(FIRST_BOOK_ID)).thenReturn(Flux.just(comment1, comment2));
+        when(modelMapper.map(comment1, CommentDto.class)).thenReturn(commentDto1);
+        when(modelMapper.map(comment2, CommentDto.class)).thenReturn(commentDto2);
 
-        mockMvc.perform(get(BOOK_URL + "/{id}" + COMMENTS, FIRST_BOOK_ID))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(comments)));
+        webTestClient.get().uri(BOOK_URL + "/{id}" + COMMENTS, FIRST_BOOK_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CommentDto.class)
+                .hasSize(2)
+                .consumeWith(response -> {
+                    List<CommentDto> commentDtos = response.getResponseBody();
+                    assertThat(commentDtos).contains(commentDto1, commentDto2);
+                });
+
+        verify(commentRepository).findAllByBookId(FIRST_BOOK_ID);
     }
 
-    private BookDto getBookDto(String id, String title) {
+    private BookDto getBookDtoWithId(String id, String title) {
         var authorDto = new AuthorDto(FIRST_AUTHOR_ID, FIRST_AUTHOR_FULLNAME);
         var genres = List.of(new Genre(FIRST_GENRE_ID, FIRST_GENRE_NAME),
                 new Genre(SECOND_GENRE_ID, SECOND_GENRE_NAME));
         return new BookDto(id, title, authorDto, genres);
     }
 
-    private BookDto getBookDto(String title) {
-        var authorDto = new AuthorDto(FIRST_AUTHOR_ID, FIRST_AUTHOR_FULLNAME);
+    private Book getBookWithId(String id, String title) {
+        var author = new Author(FIRST_AUTHOR_ID, FIRST_AUTHOR_FULLNAME);
         var genres = List.of(new Genre(FIRST_GENRE_ID, FIRST_GENRE_NAME),
                 new Genre(SECOND_GENRE_ID, SECOND_GENRE_NAME));
-        return new BookDto(null, title, authorDto, genres);
+        return new Book(id, title, author, genres);
+    }
+
+    private Book getBook(String title) {
+        var author = new Author(FIRST_AUTHOR_ID, FIRST_AUTHOR_FULLNAME);
+        var genres = List.of(new Genre(FIRST_GENRE_ID, FIRST_GENRE_NAME),
+                new Genre(SECOND_GENRE_ID, SECOND_GENRE_NAME));
+        return new Book(null, title, author, genres);
     }
 }

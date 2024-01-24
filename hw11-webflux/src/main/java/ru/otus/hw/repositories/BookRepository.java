@@ -1,7 +1,9 @@
 package ru.otus.hw.repositories;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Book;
 
-public interface BookRepository extends MongoRepository<Book, String> {
+@Repository
+public interface BookRepository extends ReactiveMongoRepository<Book, String> {
 }
