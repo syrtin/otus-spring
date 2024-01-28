@@ -16,7 +16,6 @@ import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RestController
@@ -78,17 +77,14 @@ public class BookController {
     }
 
     private Mono<BookDto> save(String id, String title, String authorId, List<String> genresIds) {
-        return authorRepository.findById(authorId)
-                .switchIfEmpty(Mono.error(new EntityNotFoundException("Author with id " + authorId + " not found")))
-                .flatMap(author -> genreRepository.findAllByIdIn(genresIds)
-                        .collectList()
-                        .filter(genres -> !genres.isEmpty())
-                        .switchIfEmpty(Mono.error(new EntityNotFoundException("Genres with ids " + genresIds + " not found")))
-                        .map(genres -> {
-                            var book = new Book(id, title, author, genres);
-                            return bookRepository.save(book)
-                                    .map(savedBook -> modelMapper.map(savedBook, BookDto.class));
-                        }))
-                .flatMap(Function.identity());
+        var author = authorRepository.findById(authorId)
+                .switchIfEmpty(Mono.error(new EntityNotFoundException("Author with id " + authorId + " not found")));
+        var genres = genreRepository.findAllByIdIn(genresIds)
+                .collectList()
+                .filter(lst -> !lst.isEmpty())
+                .switchIfEmpty(Mono.error(new EntityNotFoundException("Genres with ids " + genresIds + " not found")));
+        return Mono.zip(author, genres).map(t -> new Book(id, title, t.getT1(), t.getT2()))
+                .flatMap(bookRepository::save)
+                .map(savedBook -> modelMapper.map(savedBook, BookDto.class));
     }
 }
