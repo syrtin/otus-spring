@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Book</title>
+    <link type="text/css" rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+<div class="container">
+    <h1>New Book</h1>
+    <form id="newBookForm">
+        <table>
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genres</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <input type="text" id="titleInput">
+                </td>
+                <td>
+                    <select id="authorSelect"></select>
+                </td>
+                <td>
+                    <select multiple="multiple" id="genresSelect"></select>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <button type="button" onclick="saveBook()" class="save-btn">
+            <i class="fas fa-save"></i>
+            <span class="save-btn-text">Save</span>
+        </button>
+    </form>
+</div>
+
+<script>
+    const titleInput = document.getElementById('titleInput');
+    const authorSelect = document.getElementById('authorSelect');
+    const genresSelect = document.getElementById('genresSelect');
+
+    function saveBook() {
+        const title = titleInput.value;
+        const authorId = authorSelect.value;
+        const selectedGenres = Array.from(genresSelect.selectedOptions)
+            .map(option => ({id: option.value, name: option.textContent}));
+
+        const requestBody = JSON.stringify({
+            id: null,
+            title: title,
+            author: {
+                id: authorId
+            },
+            genres: selectedGenres
+        });
+
+        fetch('/api/books', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: requestBody
+        })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = "/books";
+                } else {
+                    alert("Operation did not perform well! Choose correct data!");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function renderBookData() {
+
+        fetch('/api/authors')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(author => {
+                    const option = document.createElement('option');
+                    option.value = author.id;
+                    option.text = author.fullName;
+                    authorSelect.appendChild(option);
+                });
+            });
+
+        fetch('/api/genres')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(genre => {
+                    const option = document.createElement('option');
+                    option.value = genre.id;
+                    option.text = genre.name;
+                    genresSelect.appendChild(option);
+                });
+            });
+
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+        renderBookData();
+    });
+</script>
+</body>
+</html>
