@@ -2,12 +2,16 @@ package ru.otus.hw.page;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.security.SecurityConfiguration;
+
+import java.util.stream.Stream;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,24 +33,20 @@ class BookPagesControllerSecurityTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "USER, /books",
-            "USER, /books/1",
-            "ADMIN, /books/1/edit",
-            "ADMIN, /books/new"
-    })
-    void testPageAccessWithRole(String role, String url) throws Exception {
+    @MethodSource("accessTestData")
+    void testPageAccessWithRoleAndStatusCode(String role, String url, int expectedStatusCode) throws Exception {
         mockMvc.perform(get(url).with(user("user").roles(role)))
-                .andExpect(status().isOk());
+                .andExpect(status().is(expectedStatusCode));
     }
 
-    @ParameterizedTest
-    @CsvSource({
-            "USER, /books/1/edit",
-            "USER, /books/new"
-    })
-    void testUnauthorizedEditFormAccess_ShouldReturnForbidden(String role, String url) throws Exception {
-        mockMvc.perform(get(url).with(user("user").roles(role)))
-                .andExpect(status().isForbidden());
+    private static Stream<Arguments> accessTestData() {
+        return Stream.of(
+                Arguments.of("USER", "/books", 200),
+                Arguments.of("USER", "/books/1", 200),
+                Arguments.of("ADMIN", "/books/1/edit", 200),
+                Arguments.of("ADMIN", "/books/new", 200),
+                Arguments.of("USER", "/books/1/edit", 403),
+                Arguments.of("USER", "/books/new", 403)
+        );
     }
 }
