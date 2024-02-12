@@ -1,0 +1,49 @@
+spring:
+  main:
+    allow-circular-references: true
+
+  batch:
+    job:
+      enabled: false
+
+  shell:
+    interactive:
+      enabled: false
+    noninteractive:
+      enabled: false
+
+    command:
+      version:
+        enabled: false
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+  sql:
+    init:
+      mode: always
+      data-locations: data.sql
+      schema-locations: schema.sql
+
+  jpa:
+    generate-ddl: false
+    hibernate:
+      ddl-auto: none
+
+  data:
+    mongodb:
+      port: 0
+      database: test
+      host: localhost
+#      port: 27017
+#      database: awesomeMongo
+
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 4.0.2
