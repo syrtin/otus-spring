@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:maindb
+  sql:
+    init:
+      mode: always
+#      data-locations: data.sql
+#      schema-locations: schema.sql
+
+  jpa:
+    generate-ddl: false
+    hibernate:
+      ddl-auto: none
+#    show-sql: true
+
+  data:
+    rest:
+      basePath: /datarest
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true
+
+logging:
+  level:
+    root:
+      info
+  file:
+    name:
+      ./log/books.log
