@@ -16,4 +16,8 @@ public class GenreServiceImpl implements GenreService {
     public List<Genre> findAll() {
         return genreRepository.findAll();
     }
+
+    public long countAllGenres() {
+        return genreRepository.count();
+    }
 }
