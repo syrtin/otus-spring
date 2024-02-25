@@ -1,0 +1,76 @@
+a {
+    color: dimgray;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+thead {
+    background-color: lightgray;
+}
+
+td, th {
+    padding: 5px;
+    border: 1px solid lightgray;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.container input[type="submit"] {
+    margin-top: 10px;
+}
+
+.comment-id {
+    padding: 5px;
+    background-color: lightgray;
+    margin-bottom: 0;
+}
+
+.comment-text {
+    padding: 5px;
+    margin-top: 0;
+    border: 1px solid lightgray;
+}
+
+.add-btn,
+.save-btn {
+    padding: 5px;
+    font-weight: bold;
+    color: dimgray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    margin: 10px auto;
+}
+
+.add-btn-text,
+.save-btn-text {
+    font-size: 14px;
+    margin-left: 5px;
+}
+
+.add-btn i,
+.save-btn i,
+.edit-btn,
+.delete-btn {
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: dimgray;
+}
+
+.edit-btn:hover,
+.delete-btn:hover {
+    color: dimgray;
+}
