@@ -36,3 +36,13 @@ logging:
   file:
     name:
       ./log/books.log
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 8
+        minimumNumberOfCalls: 4
+        waitDurationInOpenState: 1s
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true
