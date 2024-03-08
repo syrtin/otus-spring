@@ -1,0 +1,48 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5430/demoDB
+    username: usr
+    password: pwd
+  flyway:
+    enabled: true
+
+
+  jpa:
+    generate-ddl: false
+    hibernate:
+      ddl-auto: none
+#    show-sql: true
+
+  data:
+    rest:
+      basePath: /datarest
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics,health,logfile
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true
+
+logging:
+  level:
+    root:
+      info
+  file:
+    name:
+      ./log/books.log
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 8
+        minimumNumberOfCalls: 4
+        waitDurationInOpenState: 1s
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true
